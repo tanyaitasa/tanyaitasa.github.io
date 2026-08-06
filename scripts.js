@@ -2,14 +2,61 @@
         var submitted = false;
 
         const UNITS = [
-                    "IPSRS", "IGD", "RADIOLOGI", "LABORATORIUM", "PENDAFTARAN RAJAL LT 1", "PENDAFTARAN IGD", 
-                    "POLI PENYAKIT DALAM 1", "POLI PENYAKIT DALAM 2", "POLI PARU", "POLI BEDAH", "POLI MATA", 
-                    "KASIR", "DEPO FARMASI", "CASEMIX", "REKAM MEDIK", "NICU", "ICU", "IBS/OK", "GUDANG FARMASI", 
-                    "VK", "CSSI", "HEMODIALISA", "POLI OBGYN", "POLI BEDAH MULUT", "POLI GIGI", "POLI JIWA", 
-                    "POLI MCU", "POLI SARAF", "POLI ANAK", "GIZI", "REHAB MEDIK", "FISIOTERAPI", "RAWAT INAP LT 4", 
-                    "RAWAT INAP LT 5", "BIDANG PENUNJANG", "DIREKTUR & SEKRETARIS", "TATA USAHA", "BIDANG KEPERAWATAN", 
-                    "BIDANG PELAYANAN", "LAUNDRY", "PEMULASARAN JENAZAH", "IT", "MOD", "CLEANING SERVICE", 
-                    "RUANG EKG", "NURSE STATION LT 1", "NURSE STATION LT 3", "PENDAFTARAN RAJAL LT 3", "PENDAFTARAN RANAP"
+                    "IPSRS",
+                    "IGD",
+                    "RADIOLOGI",
+                    "LABORATORIUM",
+                    "PENDAFTARAN LOBBY LANTAI 1",
+                    "PENDAFTARAN IGD", 
+                    "POLI PENYAKIT DALAM 1",
+                    "POLI PENYAKIT DALAM 2",
+                    "POLI PARU",
+                    "POLI BEDAH",
+                    "POLI MATA", 
+                    "KASIR",
+                    "DEPO FARMASI",
+                    "CASEMIX",
+                    "REKAM MEDIK",
+                    "NICU",
+                    "ICU",
+                    "IBS/OK",
+                    "GUDANG FARMASI", 
+                    "VK",
+                    "CSSI",
+                    "HEMODIALISA",
+                    "POLI OBGYN",
+                    "POLI BEDAH MULUT",
+                    "POLI GIGI",
+                    "POLI JIWA", 
+                    "POLI MCU",
+                    "POLI SARAF",
+                    "POLI ANAK",
+                    "GIZI",
+                    "REHAB MEDIK",
+                    "FISIOTERAPI",
+                    "RANAP LANTAI 4", 
+                    "RANAP LANTAI 5",
+                    "BIDANG PENUNJANG",
+                    "DIREKTUR & SEKRETARIS",
+                    "TATA USAHA",
+                    "BIDANG KEPERAWATAN", 
+                    "BIDANG PELAYANAN",
+                    "LAUNDRY",
+                    "PEMULASARAN JENAZAH",
+                    "IT",
+                    "MOD",
+                    "CLEANING SERVICE", 
+                    "RUANG EKG",
+                    "NURSE STATION LT 1",
+                    "NURSE STATION LT 3",
+                    "PENDAFTARAN RAJAL LT 3",
+                    "PENDAFTARAN RANAP",
+                    "UMUM KEPEGAWAIAN",
+                    "KEUANGAN",
+                    "PEP",
+                    "POLI THT",
+                    "POLI ORTHOPEDI",
+                    "PENDAFTARAN ONLINE LANTAI 1"
                 ];
 
 // --- DATA ---
@@ -315,3 +362,108 @@ function toggleSidebar() {
                 sidebar.style.width = ''; // Reset inline style
             }
         });
+
+        // --- FUNGSI TAMPILKAN POP-UP NOTIFIKASI ---
+function showNotification(type, title, message) {
+    const isSuccess = type === 'success';
+    const bgColor = isSuccess 
+        ? 'bg-emerald-900/90 border-emerald-500/30 text-white' 
+        : 'bg-rose-900/90 border-rose-500/30 text-white';
+    
+    const iconBg = isSuccess ? 'bg-emerald-500' : 'bg-rose-500';
+    const iconName = isSuccess ? 'check-circle-2' : 'alert-circle';
+
+    const toastHtml = `
+        <div class="toast-item pointer-events-auto flex items-start gap-3.5 p-4 min-w-[320px] max-w-sm bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl text-white animate-toast-in">
+            <div class="w-9 h-9 rounded-xl ${iconBg} text-white flex items-center justify-center flex-shrink-0 shadow-lg mt-0.5">
+                <i data-lucide="${iconName}" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1 pr-2">
+                <h4 class="font-bold text-sm tracking-wide">${title}</h4>
+                <p class="text-xs text-gray-300 mt-1 leading-relaxed">${message}</p>
+            </div>
+            <button class="text-gray-400 hover:text-white transition-colors" onclick="closeToast(this)">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    `;
+
+    const $toast = $(toastHtml);
+    $('#toast-container').append($toast);
+    lucide.createIcons();
+
+    // Auto-close setelah 4 detik
+    setTimeout(() => {
+        closeToast($toast);
+    }, 4000);
+}
+
+// Fungsi menutup toast
+function closeToast(element) {
+    const $toast = $(element).closest('.toast-item');
+    if ($toast.length && !$toast.hasClass('animate-toast-out')) {
+        $toast.removeClass('animate-toast-in').addClass('animate-toast-out');
+        setTimeout(() => $toast.remove(), 350);
+    }
+}
+
+// --- CALLBACK SAAT IFRAME SELESAI MEMUAT (RESPON GOOGLE FORM) ---
+window.handleIframeLoad = function() {
+    if (submitted) {
+        // Tampilkan Notifikasi Berhasil
+        showNotification(
+            'success', 
+            'Laporan Terkirim!', 
+            'Tiket kendala berhasil dicatat ke sistem IT. Menampilkan solusi...'
+        );
+
+        // Sembunyikan modal tiket
+        $('#initial-modal').fadeOut(300);
+
+        // Reset tombol submit
+        $('#btn-text').text('Kirim & Lihat Solusi');
+        $('#btn-loader').addClass('hidden');
+        $('#btn-icon').removeClass('hidden');
+        $('#submit-btn').prop('disabled', false);
+
+        // Filter halaman utama sesuai kendala
+        const issueVal = $('#form-issue').val();
+        $('#search-box').val(issueVal);
+        searchQuery = issueVal;
+        showView('home');
+
+        // Reset flag
+        submitted = false;
+    }
+};
+
+// --- HANDLER SUBMIT TIKET ---
+$(document).ready(() => {
+    // Tambahkan parameter 'e' pada callback submit
+    $('#ticket-form').on('submit', function(e) {
+
+        // Validasi Unit
+        if (!$('#form-unit').val()) {
+            e.preventDefault();
+            $('#unit-search').addClass('ring-2 ring-red-500');
+            showNotification('error', 'Unit Belum Dipilih', 'Silakan cari dan pilih unit/lokasi terlebih dahulu.');
+            return false;
+        }
+
+        // Validasi Koneksi Internet
+        if (!navigator.onLine) {
+            e.preventDefault();
+            showNotification('error', 'Koneksi Terputus', 'Periksa koneksi internet Anda lalu coba lagi.');
+            return false;
+        }
+
+        // Tandai bahwa form mulai dikirim
+        submitted = true;
+
+        // Ubah tampilan tombol ke mode loading
+        $('#btn-text').text('Mengirim...');
+        $('#btn-loader').removeClass('hidden');
+        $('#btn-icon').addClass('hidden');
+        $('#submit-btn').prop('disabled', true);
+    });
+});
